@@ -19,7 +19,7 @@ $ python password_strength.py password
 $ python password_strength.py qwerty123
 ```
 
-#P.S.
+# P.S.
 
 You should find blacklist and other forbidden list by yourself. List in this script is only for example.
 
