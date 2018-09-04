@@ -29,15 +29,7 @@ def is_special(char):
     return char not in all_normal_chars
 
 
-def calc_password_strength(password, blacklist, forbidden_list):
-    PASSWORD_STRENGTH_MIN = 0
-    PASSWORD_STRENGTH_MAX = 10
-
-    if password in blacklist:
-        return PASSWORD_STRENGTH_MIN
-
-    password_strength = PASSWORD_STRENGTH_MAX
-
+def compose_regex_list():
     upper_and_lower_chars = r'(?=[A-Z]*[a-z])(?=[a-z]*[A-Z])[a-zA-Z]'
     more_than_eight_word_length = r'\S{8,}'
     numbers_chars = r'\d'
@@ -46,8 +38,19 @@ def calc_password_strength(password, blacklist, forbidden_list):
         more_than_eight_word_length,
         numbers_chars
     ]
+    return regex_list
 
-    for regex in regex_list:
+
+def calc_password_strength(password, blacklist, forbidden_list):
+    password_strength_min = 0
+    password_strength_max = 10
+
+    if password in blacklist:
+        return password_strength_min
+
+    password_strength = password_strength_max
+
+    for regex in compose_regex_list():
         if not re.search(regex, password):
             password_strength -= 2
     for word in forbidden_list:
@@ -58,7 +61,7 @@ def calc_password_strength(password, blacklist, forbidden_list):
     if not spec_chars:
         password_strength -= 2
 
-    return max(PASSWORD_STRENGTH_MIN, password_strength)
+    return max(password_strength_min, password_strength)
 
 
 if __name__ == '__main__':
