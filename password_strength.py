@@ -29,16 +29,36 @@ def is_special(char):
     return char not in all_normal_chars
 
 
-def compose_regex_list():
+def calc_weakness_by_spec_chars(password):
+    weakness_factor = 0
+    spec_chars = [char for char in password if is_special(char)]
+    if not spec_chars:
+        weakness_factor += 2
+    return weakness_factor
+
+
+def calc_weakness_by_regex(password):
     upper_and_lower_chars = r'(?=[A-Z]*[a-z])(?=[a-z]*[A-Z])[a-zA-Z]'
-    more_than_eight_word_length = r'\S{8,}'
+    more_than_eight_words_length = r'\S{8,}'
     numbers_chars = r'\d'
     regex_list = [
         upper_and_lower_chars,
-        more_than_eight_word_length,
+        more_than_eight_words_length,
         numbers_chars
     ]
-    return regex_list
+    weakness_factor = 0
+    for regex in regex_list:
+        if not re.search(regex, password):
+            weakness_factor += 2
+    return weakness_factor
+
+
+def calc_weakness_by_forbidden_list(password, forbidden_list):
+    weakness_factor = 0
+    for word in forbidden_list:
+        if re.search(word, password):
+            weakness_factor += 1
+    return weakness_factor
 
 
 def calc_password_strength(password, blacklist, forbidden_list):
@@ -49,17 +69,10 @@ def calc_password_strength(password, blacklist, forbidden_list):
         return password_strength_min
 
     password_strength = password_strength_max
-
-    for regex in compose_regex_list():
-        if not re.search(regex, password):
-            password_strength -= 2
-    for word in forbidden_list:
-        if re.search(word, password):
-            password_strength -= 1
-
-    spec_chars = [char for char in password if is_special(char)]
-    if not spec_chars:
-        password_strength -= 2
+    password_strength -= calc_weakness_by_regex(password)
+    password_strength -= calc_weakness_by_forbidden_list(password,
+                                                         forbidden_list)
+    password_strength -= calc_weakness_by_spec_chars(password)
 
     return max(password_strength_min, password_strength)
 
