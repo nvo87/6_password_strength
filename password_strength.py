@@ -12,13 +12,15 @@ def parse_args():
     parser.add_argument(
         '-bl',
         '--blacklist_path',
-        help='Txt file with passwords blacklist, separated by new line'
+        help='Txt file with passwords blacklist, separated by new line',
+        default='bl.txt'
     )
     parser.add_argument(
         '-fl',
         '--forbiddenlist_path',
         help='Txt file with abbreviations, birthdays and so on, '
-             'separated by new line'
+             'separated by new line',
+        default='fl.txt'
     )
 
     return parser.parse_args()
@@ -39,12 +41,12 @@ def calc_weakness_by_spec_chars(password):
 
 def calc_weakness_by_regex(password):
     upper_and_lower_chars = r'(?=[A-Z]*[a-z])(?=[a-z]*[A-Z])[a-zA-Z]'
-    more_than_eight_words_length = r'\S{8,}'
-    numbers_chars = r'\d'
+    more_than_eight_chars_length = r'\S{8,}'
+    digit_chars = r'\d'
     regex_list = [
         upper_and_lower_chars,
-        more_than_eight_words_length,
-        numbers_chars
+        more_than_eight_chars_length,
+        digit_chars
     ]
     weakness_factor = 0
     for regex in regex_list:
@@ -65,14 +67,16 @@ def calc_password_strength(password, blacklist, forbidden_list):
     password_strength_min = 0
     password_strength_max = 10
 
-    if password in blacklist:
+    password_strength = password_strength_max
+
+    if blacklist and password in blacklist:
         return password_strength_min
 
-    password_strength = password_strength_max
     password_strength -= calc_weakness_by_regex(password)
-    password_strength -= calc_weakness_by_forbidden_list(password,
-                                                         forbidden_list)
     password_strength -= calc_weakness_by_spec_chars(password)
+    if forbidden_list:
+        password_strength -= calc_weakness_by_forbidden_list(
+            password, forbidden_list)
 
     return max(password_strength_min, password_strength)
 
@@ -86,6 +90,12 @@ if __name__ == '__main__':
 
     blacklist = try_get_list_from_file(blacklist_filepath)
     forbidden_list = try_get_list_from_file(forbidden_list_filepath)
+
+    if not blacklist:
+        print('blacklist file not found')
+    if not forbidden_list:
+        print('forbidden list file not found')
+
     forbidden_list.append(username)
 
     print('password strength is:',

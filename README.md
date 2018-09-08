@@ -21,7 +21,9 @@ $ python password_strength.py qwerty123
 
 # P.S.
 
-You should find blacklist and other forbidden list by yourself. List in this script is only for example.
+'To check your password strength more correctly, you should find blacklist and other forbidden list by yourself.  
+For example, from here https://github.com/danielmiessler/SecLists/tree/master/Passwords.  
+Type: -h for more info'
 
 # Project Goals
 
